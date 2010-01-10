@@ -14,6 +14,7 @@ class CamShiftTracking {
 public:
 	CamShiftTracking();
 	CvBox2D track( IplImage* image, CvRect selection);
+	void setVmax(int value);
 	CvScalar hsv2rgb( float hue );
 	virtual ~CamShiftTracking();
 };

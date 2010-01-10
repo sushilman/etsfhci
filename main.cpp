@@ -16,6 +16,7 @@ const char* cascade_name =
 bool isIrisSet=false;
 int add_remove_pt;
 
+
 EyeExtract eyeExtract;
 EyeDetect eyeDetect;
 HoughCircle houghcircle;
@@ -186,7 +187,7 @@ void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
 	FaceDetect facedetect;
 	bool isEyeDetected=false;
 	facedetect.setHaarClassifier(cascade);
-	cout<<"Assertion test 0.1";
+	cout<<""; // dont know why this is reqd.. must be sth about buffer
 	facedetect.extractFace(img);
 	if((img)){ // Face is extracted here
 		cvShowImage("Face",img);
@@ -198,8 +199,8 @@ void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
 			cvReleaseImage(&img);
 			return;
 		}
-		cout<<"\nAssertion test 0.2";
-		cvShowImage("eyeExtract",img);
+//		cout<<"\nAssertion test 0.2";
+//		cvShowImage("eyeExtract",img);
 //		cvWaitKey(0);
 
 
@@ -210,7 +211,7 @@ void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
 		//eyetracking.trackLucasKanade(img, &houghCenter, &add_remove_pt, &isIrisSet);
 
 //
-		char* cascade_name_eye="/opt/opencv/share/opencv/haarcascades/haarcascade_mcs_righteye.xml";
+//		char* cascade_name_eye="/opt/opencv/share/opencv/haarcascades/haarcascade_mcs_righteye.xml";
 //		//char* cascade_name_eye="/opt/opencv/share/opencv/haarcascades/haarcascade_eye.xml";
 //		//char* cascade_name_eye="/opt/opencv/share/opencv/haarcascades/haarcascade_righteye_2splits.xml";
 //
@@ -241,31 +242,26 @@ void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
 
 		if(!isIrisSet && isEyeDetected){
 			//houghcircle.drawHocvCopyughCircles(img, 100, 30, 100, 20,50);
-			cout<<"Assertion test 2";
-			houghcircle.drawHoughCircles(img, 100, 30, 100, 25, 50);
+			houghcircle.drawHoughCircles(img, 100, 30, 100, 20, 50);
 			if(houghcircle.isHoughDetected()){
-				cout<<"Assertion test 3";
 				isIrisSet=true;
 				add_remove_pt=1; // add a point for tracking
 			}else{
-				cout<<"Assertion test 4";
 				isIrisSet=false;
 				//add_remove_pt=0;
 			}
 
 			houghCenter=houghcircle.getCenter();
 			houghRadius=houghcircle.getRadius();
-			cout<<"Assertion test 5";
-			cvShowImage("Hough Eye",img);
-			cout<<"Assertion test 5.1";
+			cvShowImage("Iris Detection",img);
 			//get center of hough circle
 			//pt=cvPoint(p[0],p[1]);
 		}
 		if(isIrisSet && isEyeDetected){ //if Iris is set
-			cout<<"Assertion test 6";
 			//isIrisSet=false;
 			try{
 				//isIrisSet=eyetracking.trackLucasKanade(img, &houghCenter, &add_remove_pt, &isIrisSet);
+				//cvEqualizeHist(img,img);
 				isIrisSet=eyetracking.trackCamShift(img,&houghCenter,houghRadius);
 			}catch(...){
 				cerr<<"Error something is wrong"<<endl;
@@ -275,6 +271,5 @@ void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
 		}
 
 	}
-	cout<<"Assertion test 7";
 	cvReleaseImage(&img);
 }

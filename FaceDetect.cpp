@@ -8,7 +8,7 @@
 #include "FaceDetect.h"
 #include "X11/Xlib.h"
 
-CvHaarClassifierCascade* haarcascade;
+static CvHaarClassifierCascade* haarcascade;
 
 CvRect oldFaceRect;
 bool isFirst=true;
@@ -93,14 +93,14 @@ void FaceDetect::extractFace(IplImage* img){
 //			temp=extractROI.extractROI(img,faceRect);
 //		}
 		if(largestRect){
-//			if(isFirst){
-//				oldFaceRect=faceRect;
-//				isFirst=false;
-//			}else{
-//				if(abs(oldFaceRect.width-faceRect.width) < 20 || abs(oldFaceRect.x-faceRect.x) < 20){
-//					faceRect=oldFaceRect;
-//				}
-//			}
+			if(isFirst){
+				oldFaceRect=faceRect;
+				isFirst=false;
+			}else{
+				if(abs(oldFaceRect.width-faceRect.width) < 20 ){//|| abs(oldFaceRect.x-faceRect.x) < 20){
+					faceRect=oldFaceRect;
+				}
+			}
 			cvSetImageROI(img,faceRect);
 		}else{
 			img=0;
