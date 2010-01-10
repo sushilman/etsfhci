@@ -21,7 +21,7 @@ IplImage* EyeExtract::extract(IplImage* img){
 	 */
 //	IplImage* temp=0;
 	if(!img->roi){
-		cerr<<"Error !!!";
+		cerr<<"Error no face!!!";
 		cvReleaseImage(&img);
 		return 0;
 	}

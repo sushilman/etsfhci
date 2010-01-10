@@ -14,7 +14,7 @@ EyeTracking::EyeTracking() {
 
 }
 bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
-	CamShiftTracking camshift;
+	CamShiftTracking camshift,camshiftEye;
 	CvRect selectionIris,selectionEye;
 	int r;
 	if(radius<10){
@@ -47,8 +47,11 @@ bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
 	CvBox2D boxIris,boxEye;
 
 	try{
+		camshift.setVmax(50);
 		boxIris=camshift.track(image,selectionIris);
-		boxEye=camshift.track(image,selectionEye);
+
+		camshiftEye.setVmax(75);
+		boxEye=camshiftEye.track(image,selectionEye);
 	}catch(...){
 		cerr<<"Some Error";
 		return false; // is exception generated when tracking fails??
@@ -60,6 +63,15 @@ bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
 	cout<<"mouseX="<<XY.x<<"\nmouseY="<<XY.y<<endl;
 
 	m.moveMouse(XY.x,XY.y);;
+
+	int c=cvWaitKey(10);
+	switch( (char) c ){
+		case 'r': // To reset to detection mode
+			return false;
+		default:
+			;
+	}
+
 	return true;
 }
 
@@ -94,24 +106,40 @@ CvPoint EyeTracking::locateCoordinates(CvBox2D boxIris,CvBox2D boxEye){
 	cout<<"\nAngle: "<<(angleEye-angleIris);
 	cout<<"\nH: "<<(heightEye-heightIris)<<", W:"<<(widthEye-widthIris)<<endl;
 
-	CvPoint blocks[6] ={cvPoint(resX/6,resY/4),cvPoint(3*resX/6,resY/4),cvPoint(5*resX/6,resY/4),
-					  cvPoint(resX/6,3*resY/4),cvPoint(3*resX/6,3*resY/4),cvPoint(5*resX/6,3*resY/4)};
+	CvPoint blocks[6] ={cvPoint(resX/6,resY/4),cvPoint(resX*3/6,resY/4),cvPoint(resX*5/6,resY/4),
+					  cvPoint(resX/6,resY*3/4),cvPoint(resX*3/6,resY*3/4),cvPoint(resX*5/6,resY*3/4)};
 
-	if(yIris<=85){ // top
-		if(xIris>=110 && xIris<=120)
-			return blocks[1];//top-middle;
-		else if(xIris>=130 && (angleIris>=3 && angleIris<=40))
-			return blocks[0];//top-left corner;
-		else if(xIris<=90 && (angleIris>=-60 && angleIris<=-20))
-			return blocks[2];//top-right corner;
-	}else if(yIris>=90){ //bottom
-		if(xIris>110 && xIris<120)
-			return blocks[4];//bottom-middle;
-		else if(xIris>=115 && (angleIris>=-10 && angleIris<=15))
-			return blocks[3];//bottom-left corner;
-		else if(xIris<=110 && (angleIris>=-10 && angleIris<=3))
-			return blocks[5];//bottom-right corner;
-	}
+//	if(yIris<=85){ // top
+//		if(xIris>=110 && xIris<=120)
+//			return blocks[1];//top-middle;
+//		else if(xIris>=130 && (angleIris>=3 && angleIris<=40))
+//			return blocks[0];//top-left corner;
+//		else if(xIris<=90 && (angleIris>=-60 && angleIris<=-20))
+//			return blocks[2];//top-right corner;
+//	}else if(yIris>=90){ //bottom
+//		if(xIris>110 && xIris<120)
+//			return blocks[4];//bottom-middle;
+//		else if(xIris>=115 && (angleIris>=-10 && angleIris<=15))
+//			return blocks[3];//bottom-left corner;
+//		else if(xIris<=110 && (angleIris>=-10 && angleIris<=3))
+//			return blocks[5];//bottom-right corner;
+//	}
+
+
+	if((xEye-xIris)<9)
+		return blocks[0];
+//	else if((xEye-xIris)>9 && (xEye-xIris)<18)
+//		return blocks[1];
+	else if((xEye-xIris)>18)
+		return blocks[2];
+
+//	if((angleIris)<-10)
+//		return blocks[1];
+//	else if((angleIris)<0)
+//		return blocks[0];
+//	else if((angleIris)>0)
+//		return blocks[2];
+
 	return blocks[4];
 }
 

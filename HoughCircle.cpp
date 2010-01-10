@@ -6,8 +6,8 @@
  */
 
 #include "HoughCircle.h"
- float radius;
- CvPoint center;
+ float radius=0;
+ CvPoint center=cvPoint(0,0);
  bool isDetected=false;
 HoughCircle::HoughCircle() {
 	// TODO Auto-generated constructor stub
@@ -22,9 +22,9 @@ CvSeq* HoughCircle::locateHoughCircles(IplImage* img,double min_distance, double
     CvMemStorage* storage = cvCreateMemStorage(0);
     cvCvtColor( img, gray, CV_BGR2GRAY );
 
-    cvShowImage("Gray",gray);
+   // cvShowImage("Gray",gray);
    // cvEqualizeHist(gray,gray);
-    //cvShowImage("Hist Eq Gray",gray);
+   // cvShowImage("Hist Eq Gray",gray);
 
 	CvSeq* circle = cvHoughCircles( gray, storage, CV_HOUGH_GRADIENT, 2, min_distance, upperThreshold, accumulatorThreshold, min_radius, max_radius);
 	cvReleaseImage(&gray);
@@ -40,7 +40,7 @@ IplImage* HoughCircle::drawHoughCircles(IplImage* img,double min_distance, doubl
 		 float* p = (float*)cvGetSeqElem( circle, i );
 		 center=cvPoint(cvRound(p[0]),cvRound(p[1]));
 		 radius=cvRound(p[2]);
-		 cvCircle( img, center, radius, CV_RGB(255,0,0), 2, 8, 0 );
+		 //cvCircle( img, center, radius, CV_RGB(255,0,0), 2, 8, 0 );
 		 if(p){
 			 isDetected=true;
 			 break;

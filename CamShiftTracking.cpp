@@ -12,8 +12,6 @@
  * TODO:
  * make a separate function for calculation of x,y coordinates
  * this functions should consider angles and sizes as well
- * look into the function cvEllipseBox(..) to get the idea how ellipse is created
- * This function should be in class that calls this object
  */
 
 #include "CamShiftTracking.h"
@@ -43,12 +41,15 @@ float* hranges = hranges_arr;
 /*
  * Under Light condition
  */
-// 50 for iris, 95 for eye
-int vmin = 0, vmax = 100, smin = 0;
+// 50 for iris, 80 for eye
+int vmin = 0, vmax = 50, smin = 0;
 
 float X=0, Y=0;
 float angle=0;
 
+void CamShiftTracking::setVmax(int value){
+	vmax=value;
+}
 
 CvScalar CamShiftTracking::hsv2rgb( float hue )
 {
@@ -82,7 +83,6 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 //	frame=cvCloneImage(image);
 //        if( !frame )
 //            return 0;
-        cout<<"Test1"<<endl;
 	if( image ){
 		/* allocate all the buffers */
 //		image = cvCreateImage( cvGetSize(frame), 8, 3 );
@@ -94,12 +94,8 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 		hist = cvCreateHist( 1, &hdims, CV_HIST_ARRAY, &hranges, 1 );
 		histimg = cvCreateImage( cvSize(320,200), 8, 3 );
 		cvZero( histimg );
-		cout<<"Test1.1"<<endl;
 	}
-	//cvCopy( frame, image, 0 );
-	cout<<"Test2"<<endl;
 	cvCvtColor( image, hsv, CV_BGR2HSV );
-	cout<<"Test3"<<endl;
 	if( track_object !=0 ){
 		int _vmin = vmin, _vmax = vmax;
 
@@ -107,8 +103,7 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 					cvScalar(180,256,MAX(_vmin,_vmax),0), mask );
 		cvSplit( hsv, hue, 0, 0, 0 );
 
-		if( track_object < 0 )
-		{
+		if( track_object < 0 ){
 			float max_val = 0.f;
 			cvSetImageROI( hue, selection );
 			cvSetImageROI( mask, selection );
@@ -131,57 +126,43 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 							 color, -1, 8, 0 );
 			}
 		}
-		cout<<"Test4"<<endl;
 		cvCalcBackProject( &hue, backproject, hist );
 		cvAnd( backproject, mask, backproject, 0 );
 		cvCamShift( backproject, track_window,
 					cvTermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ),
 					&track_comp, &track_box );
 		track_window = track_comp.rect;
-		cout<<"Test5"<<endl;
 		if( backproject_mode )
 			cvCvtColor( backproject, image, CV_GRAY2BGR );
 		if( !image->origin )
 			track_box.angle = -track_box.angle;
-
-
-//	cout<<"x:"<<track_box.center.x<< "y:"<<track_box.center.y<<endl;
-
-
-	cvEllipseBox( image, track_box, CV_RGB(255,0,0), 1, CV_AA, 0 );
+		cvEllipseBox( image, track_box, CV_RGB(255,0,0), 1, CV_AA, 0 );
 	}
-	cout<<"Test6"<<endl;
-//	if( select_object && selection.width > 0 && selection.height > 0 ){
-//		cvSetImageROI( image, selection );
-//		cvXorS( image, cvScalarAll(255), image, 0 );
-//		cvResetImageROI( image );
+	cvShowImage( "CamShift Tracking", image );
+	//cvShowImage( "Histogram", histimg );
+
+//	c = cvWaitKey(10);
+//	if( (char) c == 27 )
+//		cout<<"esc pressed";
+//		//return; //break;
+//	switch( (char) c ){
+//	case 'b':
+//		backproject_mode ^= 1;
+//		break;
+//	case 'c':
+//		track_object = 0;
+//		cvZero( histimg );
+//		break;
+//	case 'h':
+//		show_hist ^= 1;
+//		if( !show_hist )
+//			cvDestroyWindow( "Histogram" );
+//		else
+//			cvNamedWindow( "Histogram", 1 );
+//		break;
+//	default:
+//		;
 //	}
-	cout<<"Test7"<<endl;
-	cvShowImage( "CamShiftDemo", image );
-	cvShowImage( "Histogram", histimg );
-
-	c = cvWaitKey(10);
-	if( (char) c == 27 )
-		cout<<"c pressed";
-		//return; //break;
-	switch( (char) c ){
-	case 'b':
-		backproject_mode ^= 1;
-		break;
-	case 'c':
-		track_object = 0;
-		cvZero( histimg );
-		break;
-	case 'h':
-		show_hist ^= 1;
-		if( !show_hist )
-			cvDestroyWindow( "Histogram" );
-		else
-			cvNamedWindow( "Histogram", 1 );
-		break;
-	default:
-		;
-	}
 
 	//cvReleaseImage(&image);
 	cvReleaseImage(&hsv);
