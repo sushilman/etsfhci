@@ -97,7 +97,9 @@ void FaceDetect::extractFace(IplImage* img){
 				oldFaceRect=faceRect;
 				isFirst=false;
 			}else{
-				if(abs(oldFaceRect.width-faceRect.width) < 20 ){//|| abs(oldFaceRect.x-faceRect.x) < 20){
+				if(abs(oldFaceRect.width-faceRect.width) < 3 || abs(oldFaceRect.x-faceRect.x) < 3){
+//					img=0;
+//					return;
 					faceRect=oldFaceRect;
 				}
 			}

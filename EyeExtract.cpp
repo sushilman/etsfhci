@@ -31,7 +31,7 @@ IplImage* EyeExtract::extract(IplImage* img){
 
 		//CvRect eyeRect=cvRect(img->roi->xOffset+width/9,img->roi->yOffset+height/4,width/3,height/5);
 		int x = img->roi->xOffset+width/8;
-		int y = img->roi->yOffset+height/4;
+		int y = img->roi->yOffset+height/3.5;
 		int h =img->roi->height/5;
 		int w =2*h;
 		CvRect eyeRect=cvRect(x,y,w,h);

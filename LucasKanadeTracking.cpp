@@ -35,7 +35,6 @@ LucasKanadeTracking::LucasKanadeTracking() {
 bool LucasKanadeTracking::track(IplImage* img, CvPoint *center, int *add_remove_pt, bool *isIrisSet){
 	//if(pt.x==0)
 			pt=*center;
-
 		/* each time +20 and -20 is not gonna help anything..
 		 * we must use pointers similarly 'pt' and pass it thru argument
 		 *
@@ -69,7 +68,7 @@ bool LucasKanadeTracking::track(IplImage* img, CvPoint *center, int *add_remove_
 			isIrisSet=false;
 			isFirstRun=true;
 		}else if(counter>1){
-			counter=counter;
+			counter=1;
 		}
 		////////////////.////////////
 		IplImage* frame= cvCloneImage(img);
@@ -99,7 +98,7 @@ bool LucasKanadeTracking::track(IplImage* img, CvPoint *center, int *add_remove_
 		cvCvtColor( image, grey, CV_BGR2GRAY );
 		//cvEqualizeHist(image,image);
 		//cvShowImage("Trackable eye",grey);
-		cvEqualizeHist(grey,grey);
+		//cvEqualizeHist(grey,grey);
 		//cvShowImage("Trackable eyeHist",grey);
 		if( night_mode )
 			cvZero( image );
@@ -195,7 +194,7 @@ bool LucasKanadeTracking::track(IplImage* img, CvPoint *center, int *add_remove_
 				}
 
 				//int screenX=(abs((scrx*1280/256)));
-				int screenX=(abs((scrx*1280/256))) + dx*15;
+				int screenX=(abs((scrx*1280/256))) + dx*10;
 					screenX=screenX<0?100:screenX;
 				//int screenY=0;//abs(scry*4);
 				int screenY=(800-abs(scry*4))+dy*15;//abs(scry*4);
@@ -203,7 +202,29 @@ bool LucasKanadeTracking::track(IplImage* img, CvPoint *center, int *add_remove_
 
 				//cout<<"X:"<<screenX<<"Y:"<<screenY<<endl;
 				////
-				m.moveMouse(screenX,400);
+				int resX=1280;
+				int resY=800;
+				CvPoint blocks[5] ={cvPoint(0,0), cvPoint(resX/4,resY/4),cvPoint(resX*3/4,resY/4),
+									  cvPoint(resX/4,resY*3/4),cvPoint(resX*3/4,resY*3/4)};
+				if(screenX<=resX/2){
+					if(screenY<=resY/2){
+						screenX=blocks[1].x;
+						screenY=blocks[1].y;
+					}else{
+						screenX=blocks[2].x;
+						screenY=blocks[2].y;
+					}
+				}else{
+					if(screenY<=resY/2){
+						screenX=blocks[3].x;
+						screenY=blocks[3].y;
+					}else{
+						screenX=blocks[4].x;
+						screenY=blocks[4].y;
+					}
+				}
+
+				m.moveMouse(screenX,screenY);
 				//m.moveMouse(screenX,screenY);
 
 			}

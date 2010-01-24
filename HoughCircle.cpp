@@ -40,7 +40,7 @@ IplImage* HoughCircle::drawHoughCircles(IplImage* img,double min_distance, doubl
 		 float* p = (float*)cvGetSeqElem( circle, i );
 		 center=cvPoint(cvRound(p[0]),cvRound(p[1]));
 		 radius=cvRound(p[2]);
-		 //cvCircle( img, center, radius, CV_RGB(255,0,0), 2, 8, 0 );
+		 cvCircle( img, center, radius, CV_RGB(255,0,0), 2, 8, 0 );
 		 if(p){
 			 isDetected=true;
 			 break;

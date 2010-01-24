@@ -33,7 +33,7 @@ int main( int argc, char** argv ){
 	}
 
     //cvReleaseImage( &image );
-    cvDestroyWindow("result");
+    //cvDestroyWindow("result");
 }
 
 
@@ -77,10 +77,12 @@ void initialize(int argc, char** argv ){
     else
         capture = cvCaptureFromAVI( input_name );
     cvWaitKey(2000);
-    cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_WIDTH, 256);
-    cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_HEIGHT, 256);
+    //cvSetCaptureProperty(capture, CV_CAP_PROP_POS_AVI_RATIO, (double)0.9);
+    //cvSetCaptureProperty(capture,CV_CAP_PROP_FORMAT,1);
+    //cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_WIDTH, 256);
+    //cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_HEIGHT, 256);
     // Create a new named window with title: result
-    cvNamedWindow( "result", 1 );
+    //cvNamedWindow( "result", 1 );
 
     // Find if the capture is loaded successfully or not.
     // If loaded succesfully, then:
@@ -88,14 +90,16 @@ void initialize(int argc, char** argv ){
         // Capture from the camera.
         for(;;){
             // Capture the frame and load it in IplImage
-            if( !cvGrabFrame( capture ))
+            if( !cvGrabFrame( capture )){
                 break;
+            }
 
             frame = cvRetrieveFrame( capture );
 
             // If the frame does not exist, quit the loop
-            if( !frame )
+            if( !frame ){
                 break;
+            }
 
             // Allocate framecopy as the same size of the frame
             //if( !frame_copy )
@@ -109,12 +113,11 @@ void initialize(int argc, char** argv ){
             else
             	cvCopy( frame, frame_copy, 0 );
 
-            // Call the function to detect and draw the face
-            //detect_and_draw( frame_copy );
             extractFace(frame_copy,cascade);
             //cvShowImage("Result",frame_copy);
             // Wait for a while before proceeding to the next frame
-            if( cvWaitKey( 50 ) >= 0 )
+//            cvWaitKey(20);
+            if( cvWaitKey( 20 ) == 27 ) //exit if Esc is pressed(repeatedly)
                 break;
         }
 
@@ -133,8 +136,6 @@ void initialize(int argc, char** argv ){
 
         // If Image is loaded successfully, then:
         if( image ){
-            // Detect and draw the face
-            //detect_and_draw( image );
         	extractFace(image,cascade);
         	//cvShowImage("result",image);
             // Wait for user input
@@ -164,8 +165,6 @@ void initialize(int argc, char** argv ){
 
                     // If the image was loaded successfully, then:
                     if( image ){
-                        // Detect and draw the face from the image
-                        //detect_and_draw( image );
 						//return image;
                     	//cvShowImage("result",image);
                     	extractFace(image,cascade);
@@ -180,7 +179,7 @@ void initialize(int argc, char** argv ){
         }
     }
     // Destroy the window previously created with filename: "result"
-    cvDestroyWindow("result");
+    //cvDestroyWindow("result");
 }
 
 void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
@@ -190,7 +189,7 @@ void extractFace(IplImage* img, CvHaarClassifierCascade* cascade){
 	cout<<""; // dont know why this is reqd.. must be sth about buffer
 	facedetect.extractFace(img);
 	if((img)){ // Face is extracted here
-		cvShowImage("Face",img);
+		//cvShowImage("Face",img);
 		//cvWaitKey(0);
 		//extracting eye, this will return roughly estimated eye region
 		img=eyeExtract.extract(img);
