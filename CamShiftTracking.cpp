@@ -16,7 +16,7 @@
 
 #include "CamShiftTracking.h"
 
-IplImage *hsv = 0, *hue = 0, *mask = 0, *backproject = 0, *histimg = 0;
+IplImage *hsv = 0,*h1=0,*s1=0,*v1=0, *hue = 0, *mask = 0, *backproject = 0, *histimg = 0;
 CvHistogram *hist = 0;
 
 int backproject_mode = 0;
@@ -42,7 +42,7 @@ float* hranges = hranges_arr;
  * Under Light condition
  */
 // 50 for iris, 80 for eye
-int vmin = 0, vmax = 50, smin = 0;
+int vmin = 40, vmax = 50, smin = 0;
 
 float X=0, Y=0;
 float angle=0;
@@ -68,7 +68,7 @@ CvScalar CamShiftTracking::hsv2rgb( float hue )
     return cvScalar(rgb[2], rgb[1], rgb[0],0);
 }
 
-CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
+CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection, bool isIris){
 	CamShiftTracking camshift;
 	select_object=1;
 	track_object=-1;
@@ -88,6 +88,9 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 //		image = cvCreateImage( cvGetSize(frame), 8, 3 );
 //		image->origin = frame->origin;
 		hsv = cvCreateImage( cvGetSize(image), 8, 3 );
+		h1 = cvCreateImage( cvGetSize(image), 8, 1 );
+		s1 = cvCreateImage( cvGetSize(image), 8, 1 );
+		v1 = cvCreateImage( cvGetSize(image), 8, 1);
 		hue = cvCreateImage( cvGetSize(image), 8, 1 );
 		mask = cvCreateImage( cvGetSize(image), 8, 1 );
 		backproject = cvCreateImage( cvGetSize(image), 8, 1 );
@@ -96,6 +99,14 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 		cvZero( histimg );
 	}
 	cvCvtColor( image, hsv, CV_BGR2HSV );
+
+	///////////////////Equalize v in hsv///////////
+	//cvSplit( hsv, h1, s1, v1, 0 );
+	//cvEqualizeHist(v1,v1);
+	//cvMerge(h1,s1,v1,0,hsv);
+	///////////////////Equalize v in hsv///////////
+
+
 	if( track_object !=0 ){
 		int _vmin = vmin, _vmax = vmax;
 
@@ -128,17 +139,29 @@ CvBox2D CamShiftTracking::track( IplImage* image, CvRect selection){
 		}
 		cvCalcBackProject( &hue, backproject, hist );
 		cvAnd( backproject, mask, backproject, 0 );
+		try{
 		cvCamShift( backproject, track_window,
 					cvTermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ),
 					&track_comp, &track_box );
+		}catch(...){
+			cvReleaseImage(&hsv);
+			cvReleaseImage(&hue);
+			cvReleaseImage(&mask);
+			cvReleaseImage(&backproject);
+			cvReleaseHist(&hist);
+			cvReleaseImage(&histimg);
+		}
 		track_window = track_comp.rect;
 		if( backproject_mode )
 			cvCvtColor( backproject, image, CV_GRAY2BGR );
 		if( !image->origin )
 			track_box.angle = -track_box.angle;
-		cvEllipseBox( image, track_box, CV_RGB(255,0,0), 1, CV_AA, 0 );
+		if(isIris)
+			cvEllipseBox( image, track_box, CV_RGB(255,0,0), 1, CV_AA, 0 );
+		else
+			cvEllipseBox( image, track_box, CV_RGB(255,0,0), 1, CV_AA, 0 );
 	}
-	cvShowImage( "CamShift Tracking", image );
+	cvShowImage( "CamShift Tracking EYE", image );
 	//cvShowImage( "Histogram", histimg );
 
 //	c = cvWaitKey(10);
