@@ -13,7 +13,7 @@ class Calibrate {
 public:
 	Calibrate();
 
-	void startCalibration(CvBox2D box);
+	void startCalibration(CvBox2D box,CvBox2D boxEye);
 
 	int center(CvBox2D box);
 	int topRight(CvBox2D box);

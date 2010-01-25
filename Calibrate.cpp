@@ -38,30 +38,34 @@ void Calibrate::init(){
 	isBLset=false; isBRset=false;
 }
 
-void Calibrate::startCalibration(CvBox2D box){
+void Calibrate::startCalibration(CvBox2D box, CvBox2D boxEye){
 	int ch=cvWaitKey(10);
 	if(char(ch)=='0'||char(ch)=='1'||char(ch)=='2'||char(ch)=='3'||char(ch)=='4')
 		CHOICE=ch;
 	switch(char(CHOICE)){
 		case '1':
 			cout<<"Top Left";
+			cvMoveWindow("CamShift Tracking",0,0);
 			cvWaitKey(0);
 			topLeft(box);
 			break;
 		case '2':
 			cout<<"Top Right";
+			cvMoveWindow("CamShift Tracking",(1280-256),0);
 			cvWaitKey(0);
 			topRight(box);
 			break;
 		case '3':
 			cout<<"Bottom Right";
+			cvMoveWindow("CamShift Tracking",(1280-256),(800-158));
 			cvWaitKey(0);
-			bottomRight(box);
+			bottomRight(boxEye);
 			break;
 		case '4':
 			cout<<"Bottom Left";
+			cvMoveWindow("CamShift Tracking",0,(800-158));
 			cvWaitKey(0);
-			bottomLeft(box);
+			bottomLeft(boxEye);
 			break;
 		default:
 			;

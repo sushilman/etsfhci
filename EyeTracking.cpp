@@ -7,11 +7,7 @@
 
 #include "EyeTracking.h"
 
-float heightEye; // it's actually width (as we see)
-float initial_widthEye; //it's actually height of eye
-bool isHeightNoted=false;
-float eyeAngle;
-int IRIS_VMAX=12,EYE_VMAX=70;
+int IRIS_VMAX=12,EYE_VMAX=150;
 int count_discarded=0;
 Calibrate calibrate;
 
@@ -44,12 +40,11 @@ bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
 	CvBox2D boxIris,boxEye;
 
 	try{
-//		camshiftEye.setVmax(EYE_VMAX);
-//			//cvSetImageROI(image,cvRect(0,0,image->width,image->height));
-//			boxEye=camshiftEye.track(image,selectionEye,false);
-//			cout<<"EyeBox: "<<boxEye.angle<<"\n"<<endl;
-//			eyeAngle=boxEye.angle;
-//			boxEye.angle=0;
+		camshiftEye.setVmax(EYE_VMAX);
+			//cvSetImageROI(image,cvRect(0,0,image->width,image->height));
+			boxEye=camshiftEye.track(image,selectionEye,false);
+			cout<<"EyeBox: "<<boxEye.angle<<"\n"<<endl;
+			//boxEye.angle=0; // setting angle to 0
 //
 //			if(!isHeightNoted){
 //				heightEye=boxEye.size.height;
@@ -143,10 +138,8 @@ bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
 
 			if(!calibrate.isCalibrated()){
 				cout<<"CALIBRATION MODE:"<<endl;
-				calibrate.startCalibration(boxIris);
+				calibrate.startCalibration(boxIris,boxEye);
 				return true;
-			}else{
-				//set threshold values, get from calibrate.get... getter fxns
 			}
 
 		}catch(...){
@@ -171,9 +164,9 @@ bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
 	cout<<"Bottom Left"<<calibrate.getBottomLeftMin().y<<" - "<<calibrate.getBottomLeftMax().y<<endl;
 	cout<<"Bottom Right"<<calibrate.getBottomRightMin().y<<" - "<<calibrate.getBottomRightMax().y<<endl;
 
-	cvWaitKey(0);
+	//cvWaitKey(0);
 
-	CvPoint XY=this->locateCoordinates(boxIris,
+	CvPoint XY=this->locateCoordinates(boxIris,boxEye,
 										calibrate.getTopLeftMin(), calibrate.getTopLeftMax(),
 										calibrate.getTopRightMin(), calibrate.getTopRightMax(),
 										calibrate.getBottomRightMin(), calibrate.getBottomRightMax(),
@@ -187,12 +180,13 @@ bool EyeTracking::trackCamShift(IplImage* image, CvPoint *center, int radius){
 	return true;
 }
 
-CvPoint EyeTracking::locateCoordinates(CvBox2D boxIris,CvPoint topLeftMin,CvPoint topLeftMax, CvPoint topRightMin,CvPoint topRightMax, CvPoint bottomRightMin,CvPoint bottomRightMax, CvPoint bottomLeftMin,CvPoint bottomLeftMax){
+CvPoint EyeTracking::locateCoordinates(CvBox2D boxIris,CvBox2D boxEye,CvPoint topLeftMin,CvPoint topLeftMax, CvPoint topRightMin,CvPoint topRightMax, CvPoint bottomRightMin,CvPoint bottomRightMax, CvPoint bottomLeftMin,CvPoint bottomLeftMax){
 	float xIris=boxIris.center.x;
 	float yIris=boxIris.center.y;
 	float angleIris=boxIris.angle;
 	float heightIris=boxIris.size.height;
 	float widthIris=boxIris.size.width;
+	float widthEye=boxEye.size.width;
 
 	int resX=1280;
 	int resY=800;
@@ -211,13 +205,13 @@ CvPoint EyeTracking::locateCoordinates(CvBox2D boxIris,CvPoint topLeftMin,CvPoin
 	 */
 
 	if(xIris>topLeftMin.x){ //Left
-		if(widthIris<bottomLeftMax.y) // instead of y, width (height as we perceive) wud be better
+		if(widthEye<bottomLeftMax.y) // instead of y, width (height as we perceive) wud be better
 			currentBlock=blocks[3];
 		else
 			currentBlock=blocks[1];
 
 	}else if(xIris<topRightMax.x){ //Right
-		if(widthIris<bottomRightMax.y)
+		if(widthEye<bottomRightMax.y)
 			currentBlock=blocks[4];
 		else
 			currentBlock=blocks[2];
